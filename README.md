@@ -3,7 +3,7 @@
 This repository contains a Quarto project for analyzing a simulated dataset to determine the underlying formulae used to generate the data. The analysis focuses on identifying the relationships between various predictors and the response variable `cost`.
 
 ## Project Structure
-
+```
 HRP203_Assignment9/
 │
 ├── .DS_Store
@@ -63,7 +63,7 @@ HRP203_Assignment9/
 │ ├── F24F9BA7/
 │ ├── shared/
 │
-
+```
 ## Analysis Overview
 
 The analysis is performed in a series of steps to uncover the relationships between the variables in the dataset:
