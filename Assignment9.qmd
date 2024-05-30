@@ -1,0 +1,115 @@
+---
+title: "Assignment 9: Simulated Data Report"
+author: "Nova J Bradford"
+format: html
+---
+
+## Introduction
+
+In this report, I analyze a simulated dataset to determine the underlying formulae that were used to generate the data. The dataset contains several variables, including `age`, `cost`, `smoke`, `female`, and `cardiac`. The goal of this analysis is to uncover the relationships between these variables and to identify the original equations that model the relationship between `cost` and the other predictors. The purpose of this assignment is to increase my familiarity with Quarto by creating a reproducible report.
+
+To achieve this, I will conduct a series of regression analyses, beginning with a simple linear regression and then extending to multiple regression models that incorporate additional variables such as `smoke`, `female`, and `cardiac`. By examining the significance of these variables and the overall fit of the models, I aim to deduce the formulae that best explain the variation in `cost`.
+
+## Method
+
+Since I am unsure of the structure of this dataset, I employ several exploratory methods. The steps involved in this analysis include:
+
+1.  **Loading and exploring the dataset**: Understanding the structure and summary statistics of the data.
+
+2.  **Multiple regression analysis**: Modeling the relationship between `cost` and `age`, including additional variables (`smoke`, `female`, `cardiac`) as covariates.
+
+3.  **Polynomial regression**: Investigating potential non-linear relationships by including a quadratic term.
+
+4.  **Model comparison**: Using ANOVA to compare different models and determine the most appropriate one.
+
+```{r}
+#| include: false
+install.packages("renv")
+renv::init()
+renv::snapshot()
+```
+
+First, I will load the data and the necessary statistical packages.
+
+```{r}
+#| warning: false
+#Load data
+cohort_data <- read.csv("cohort.csv")
+
+# Load libraries
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(tidyr)
+library(car)
+```
+
+Next I will explore the data using the head() and summary() commands to get a general sense of the data.
+
+```{r}
+# Print the first few rows of the dataset
+head(cohort_data)
+
+# Get a summary of the data
+summary(cohort_data)
+```
+
+To determine the original equations that generated the simulated data, I perform a linear regression. Then to explore potential non-linear relationships, I fit a polynomial regression model. I conduct an ANOVA to see whether there is a significant difference between these two models–if so, this would suggest that the polynomial regression is capturing variance that the linear regression is not.
+
+```{r}
+# Perform a linear regression analysis
+simple_regression <- lm(cost ~ age + smoke + female + cardiac, data = cohort_data)
+
+# Display the summary of the model
+summary(simple_regression)
+
+# Check for potential non-linear relationships and interactions
+square_regression <- lm(cost ~ age + I(age^2) + smoke + female + cardiac, data = cohort_data)
+summary(square_regression)
+
+# Compare models using ANOVA
+anova(simple_regression, square_regression)
+```
+
+The Residuals vs. Fitted Values plot will be useful for diagnosing potential problems with the regression model such as non-linearity, unequal error variances, and outliers.
+
+```{r}
+# Plot Residuals vs. Fitted Values
+plot(square_regression, which = 1, main = "Residuals vs Fitted Values")
+```
+
+Based on the results of the regressions, I will now visualize the data and fit the linear regression line.
+
+```{r}
+# Plot the original data with fitted lines
+ggplot(cohort_data, aes(x = age, y = cost)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "blue") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "red") +
+  theme_minimal() +
+  labs(title = "Cost vs Age", x = "Age", y = "Cost")
+```
+
+**Significance of Variables:**
+
+-   All variables (`age`, `smoke`, `female`, `cardiac`) in both models have a p-value that is significantly less than .05, suggesting that there is a relationship between all variables and `cost`.
+
+-   The quadratic term `I(age^2)` in the polynomial model is not significant (p-value = 0.653), indicating that adding a quadratic term for age does not significantly improve the model.
+
+**Model Fit:**
+
+-   Both models have the same $R^2$ and adjusted $R^2$ values (0.7555 and 0.7553, respectively), indicating that they explain approximately 75.55% of the variance in the `cost`.
+
+-   Residual standard error is the same for both models (199.2), suggesting similar accuracy.
+
+**ANOVA Comparison:**
+
+-   The ANOVA comparison shows that the F-statistic for the additional quadratic term is 0.2026 with a p-value of 0.6527, which is not significant. This provides further evidence that the quadratic term does not provide a significant improvement over the simple linear model.
+
+### Conclusion:
+
+-   The simple linear regression model (`cost ~ age + smoke + female + cardiac`) is sufficient for explaining the variance in `cost`. Adding a quadratic term for age does not significantly improve the model.
+
+-   The significant coefficients for `smoke`, `female`, and `cardiac` suggest that these factors have a notable impact on the cost.
+
+-   The model indicates that, on average, costs increase with age and smoking, while being female is associated with lower costs. Cardiac conditions are associated with higher costs.
